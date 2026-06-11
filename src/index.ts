@@ -2,6 +2,7 @@ import express ,  { Request, Response } from "express";
 import dotenv from "dotenv";
 import app from "../src/lib/express/express";
 import "./routes/routes";
+import { errorHandler } from "./common/errors/error-handler";
 
 
 dotenv.config();
@@ -16,6 +17,9 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
+
+app.use(errorHandler);
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
