@@ -1,3 +1,4 @@
+import AppError from "../../../common/errors/app-error";
 import { IUser } from "../models/users.model";
 import {
   getUserByIdRepo,
@@ -10,10 +11,7 @@ import { generateToken } from "../utils/jwt";
 const userRegisterService = async (
   userData: IUser,
 ): Promise<{ user: IUser }> => {
-  const { username, email, password } = userData;
-  if (!username || !email || !password) {
-    throw new Error("All fields are required");
-  }
+  const { name: username, email, password } = userData;
   const hashedPassword = await hashPassword(password);
   const newUser = await userRegisterRepo(username, email, hashedPassword);
   return { user: newUser };
@@ -24,25 +22,25 @@ const userLoginService = async (
   password: string,
 ): Promise<{ user: IUser; token: string }> => {
   if (!email || !password) {
-    throw new Error("Email and password are required");
+    throw new AppError("Email and password are required", 400);
   }
   const user = await userLoginRepo(email);
   if (!user) {
-    throw new Error("User not found");
+    throw new AppError("User not found", 404);
   }
   const isPasswordValid = await comparePassword(password, user.password);
   if (!isPasswordValid) {
-    throw new Error("Invalid password");
+    throw new AppError("Invalid password", 401);
   }
 
-  const token = generateToken(user.id); // Implement this function to generate JWT token
+  const token = generateToken(user); // Implement this function to generate JWT token
   return { user: user, token: token };
 };
 
-const getUserByIdService = async (id: number): Promise<IUser> => {
+const getUserByIdService = async (id: string): Promise<IUser> => {
   const user = await getUserByIdRepo(id);
   if (!user) {
-    throw new Error("User not found");
+    throw new AppError("User not found", 404);
   }
   return user;
 };

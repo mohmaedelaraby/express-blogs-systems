@@ -7,9 +7,8 @@ const JWT_REFRESH_KEY = process.env.JWT_REFRESH_KEY;
 
 const generateToken = (user: IUser) => {
   const payload = {
-    id: user.id,
-    username: user.username,
     email: user.email,
+    password: user.password,
   };
   const options = {
     expiresIn: "1h",
@@ -27,8 +26,6 @@ const verifyActiveToken = (token: string) => {
 
 const generateRefreshToken = (user: IUser) => {
   const payload = {
-    id: user.id,
-    username: user.username,
     email: user.email,
   };
   const options = {
