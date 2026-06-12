@@ -1,5 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyActiveToken } from "../../modules/users/utils/jwt";
+import {
+  decodeExpiredActiveToken,
+  generateToken,
+  verifyActiveToken,
+  verifyRefreshToken,
+} from "../../modules/users/utils/jwt";
 import AppError from "../errors/app-error";
 
 const PUBLIC_PATHS = ["/users/register", "/users/login"];
@@ -16,9 +21,26 @@ export function globalVerifyToken(req: Request, res: Response, next: NextFunctio
     return next(new AppError("Unauthorized: No token provided", 401));
   }
 
-  const decoded = verifyActiveToken(token);
+  let decoded = verifyActiveToken(token);
   if (!decoded) {
-    return next(new AppError("Unauthorized: Invalid or expired token", 401));
+    const expiredPayload = decodeExpiredActiveToken(token);
+    if (!expiredPayload) {
+      return next(new AppError("Unauthorized: Invalid token", 401));
+    }
+
+    const refreshToken = req.headers["x-refresh-token"] as string | undefined;
+    if (!refreshToken) {
+      return next(new AppError("Unauthorized: Token expired, refresh token required", 401));
+    }
+
+    const refreshDecoded = verifyRefreshToken(refreshToken);
+    if (!refreshDecoded) {
+      return next(new AppError("Unauthorized: Invalid or expired refresh token", 401));
+    }
+
+    const newAccessToken = generateToken(refreshDecoded);
+    res.setHeader("x-access-token", newAccessToken);
+    decoded = refreshDecoded;
   }
 
   (req as Request & { user: typeof decoded }).user = decoded;

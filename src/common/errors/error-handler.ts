@@ -24,11 +24,7 @@ export function errorHandler(err: Error, req?: Request, res?: Response, _next?: 
     const statusCode = err instanceof AppError ? err.statusCode : 500;
     const message = err instanceof AppError && err.isOperational ? err.message : "Internal Server Error";
 
-    logger.error(err.message, {
-        stack: err.stack,
-        path: req?.path,
-        method: req?.method,
-    });
+   
 
     console.error("message", err.message );
     res?.status(statusCode).json({

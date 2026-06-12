@@ -24,6 +24,18 @@ const verifyActiveToken = (token: string) => {
   }
 };
 
+const decodeExpiredActiveToken = (token: string) => {
+  try {
+    jwt.verify(token, JWT_ACTIVE_KEY);
+    return null;
+  } catch (error: any) {
+    if (error.name === "TokenExpiredError") {
+      return jwt.decode(token);
+    }
+    return null;
+  }
+};
+
 const generateRefreshToken = (user: IUser) => {
   const payload = {
     email: user.email,
@@ -44,6 +56,7 @@ const verifyRefreshToken = (token: string) => {
 export {
   generateToken,
   verifyActiveToken,
+  decodeExpiredActiveToken,
   generateRefreshToken,
   verifyRefreshToken,
 };

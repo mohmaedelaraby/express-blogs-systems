@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { userLoginService, userRegisterService } from "../services/users.services";
+import { getUserByIdService, userLoginService, userRegisterService } from "../services/users.services";
 
 const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -22,4 +22,14 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { registerUser, loginUser };
+const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.params.id;
+    const user = await getUserByIdService(userId as string);
+    res.status(200).json({name : user.name, email: user.email});
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { registerUser, loginUser, getUserById };
