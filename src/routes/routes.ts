@@ -1,7 +1,12 @@
- import app from "../lib/express/express";
-import  { Request, Response } from "express";
+import { Router, Request, Response } from "express";
+import userRoutes from "../modules/users/users";
 
+const router = Router();
 
- app.get("/", (_req: Request, res: Response) => {
+router.get("/", (_req: Request, res: Response) => {
   res.send("Express + TypeScript API is running");
 });
+
+router.use("/users", userRoutes);
+
+export default router;
